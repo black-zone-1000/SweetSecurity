@@ -23,7 +23,10 @@ def startGetConfig():
 			iptables.writeHeader()
 			allowedTrafficRules=[]
 			dropTrafficRules=[]
-			for device in serverConfig['deviceList']:
+			devices = serverConfig['deviceList']
+			devices.sort(key=lambda device: device['mac'], reverse=False)
+
+			for device in devices:
 				localConfig=sweetSecurityDB.getDeviceSpoofStatus(device['mac'])
 				if str(localConfig[0]) != str(device['ignore']):
 					if device['ignore'] == '1':
@@ -42,7 +45,9 @@ def startGetConfig():
 					trafficRule={'type': 'full', 'action': 'DROP', 'source': device['ip'], 'destination': localSubnet}
 					dropTrafficRules.append(trafficRule)
 					#iptables.addFull(device['ip'],localSubnet,'DROP')
-				for entry in device['firewall']:
+				firewallEntries = device['firewall']
+				firewallEntries.sort(key=lambda entry: entry['destination'], reverse=False)
+				for entry in firewallEntries:
 					trafficRule={'type': 'None', 'action': entry['action'], 'source': device['ip'], 'destination': 'None'}
 					if entry['destination'] == "*":
 						trafficRule['type']='simple'
@@ -67,23 +72,23 @@ def startGetConfig():
                                  else:
                                         iptables.addFull(rule['source'],rule['destination'],rule['action'])
 			iptables.writeFooter()
-			if os.path.isfile('/opt/sweetsecurity/client/iptables_existing.sh'):
+			if os.path.isfile('/opt/sweetsecurity/client/iptables/iptables_existing.sh'):
 				#Check if it changed to see if we need to apply it or not...
-				existingHash=hashlib.md5(open('/opt/sweetsecurity/client/iptables_existing.sh','rb').read()).hexdigest()
-				newHash=hashlib.md5(open('/opt/sweetsecurity/client/iptables_new.sh','rb').read()).hexdigest()
+				existingHash=hashlib.md5(open('/opt/sweetsecurity/client/iptables/iptables_existing.sh','rb').read()).hexdigest()
+				newHash=hashlib.md5(open('/opt/sweetsecurity/client/iptables/iptables_new.sh','rb').read()).hexdigest()
 				if newHash != existingHash:
-					os.remove('/opt/sweetsecurity/client/iptables_existing.sh')
-					shutil.move('/opt/sweetsecurity/client/iptables_new.sh','/opt/sweetsecurity/client/iptables_existing.sh')
-					os.chmod('/opt/sweetsecurity/client/iptables_existing.sh',755)
-					os.popen('sudo /opt/sweetsecurity/client/iptables_existing.sh').read()
-					logger.info('applying new firewall config')
+					os.remove('/opt/sweetsecurity/client/iptables/iptables_existing.sh')
+					shutil.move('/opt/sweetsecurity/client/iptables/iptables_new.sh','/opt/sweetsecurity/client/iptables/iptables_existing.sh')
+					os.chmod('/opt/sweetsecurity/client/iptables/iptables_existing.sh',755)
+					os.popen('sudo bash /opt/sweetsecurity/client/iptables/iptables_existing.sh').read()
+					logger.info('applying new firewall config (changed)')
 				else:
-					os.remove('/opt/sweetsecurity/client/iptables_new.sh')
+					os.remove('/opt/sweetsecurity/client/iptables/iptables_new.sh')
 			else:
-				shutil.move('/opt/sweetsecurity/client/iptables_new.sh','/opt/sweetsecurity/client/iptables_existing.sh')
-				os.chmod('/opt/sweetsecurity/client/iptables_existing.sh',755)
-				os.popen('sudo /opt/sweetsecurity/client/iptables_existing.sh').read()
-				logger.info('applying new firewall config')
+				shutil.move('/opt/sweetsecurity/client/iptables/iptables_new.sh','/opt/sweetsecurity/client/iptables/iptables_existing.sh')
+				os.chmod('/opt/sweetsecurity/client/iptables/iptables_existing.sh',755)
+				os.popen('sudo bash /opt/sweetsecurity/client/iptables/iptables_existing.sh').read()
+				logger.info('applying new firewall config (new)')
 		except Exception, e:
 			logger.info(str(e))
 			pass
@@ -112,6 +117,8 @@ def startLsTi():
 		if os.path.isfile('/usr/bin/critical-stack-intel'):
 			os.popen('sudo -u critical-stack critical-stack-intel pull').read()
 		sleep(3600)
+		#Backup DB
+		os.system("cp /opt/sweetsecurity/client/db/SweetSecurity.db /opt/sweetsecurity/client/SweetSecurity.db");
 
 def startHealthCheck():
 	while 1:
@@ -121,6 +128,9 @@ def startHealthCheck():
 
 def doStuff():
 	logger.info('Starting up SweetSecurity')
+
+	os.system("cp /opt/sweetsecurity/client/SweetSecurity.db /opt/sweetsecurity/client/db/SweetSecurity.db");
+
 	#Make sure we can forward data...
 	os.system("echo 1 > /proc/sys/net/ipv4/ip_forward")
 	

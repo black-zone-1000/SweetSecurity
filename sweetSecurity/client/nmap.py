@@ -8,7 +8,7 @@ import logs
 import server
 import sweetSecurityDB
 
-dbPath="/opt/sweetsecurity/client/SweetSecurity.db"
+dbPath="/opt/sweetsecurity/client/db/SweetSecurity.db"
 
 def getSystemDfgw():
 	with open("/proc/net/route") as file:
@@ -141,6 +141,7 @@ def pingSweep():
 				conn.close()
 	except:
 		logger.info("Invalid Ping Sweep XML File")
+	os.system('rm ' + file)
 
 def portScan():
 	logger = logging.getLogger('SweetSecurityLogger')
@@ -189,3 +190,4 @@ def portScan():
 					server.addPort(portInfo)
 		except:
 			logger.info("Invalid Port Scan XML File")
+		os.system('rm ' + file);
