@@ -59,7 +59,7 @@ def create_app():
                 firstSeenToday = firstSeen.date() == now.date()
 
                 lastSeen = datetime.datetime.fromtimestamp(float(host['_source']['lastSeen']) / 1000.0)
-                online = lastSeen + datetime.timedelta(minutes = 5) > now
+                online = lastSeen + datetime.timedelta(minutes = 60) > now
 
 
                 portCount=0
