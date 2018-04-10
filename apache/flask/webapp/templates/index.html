@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <section>
 
 {% if deviceList|length == 0 %}
@@ -23,6 +24,8 @@
                 <TH class="col-xs-1" nowrap><b>IP</b></TH>
                 <TH class="col-xs-1" nowrap><b>MAC</b></TH>
                 <TH class="col-xs-1" nowrap><b>Vendor</b></TH>
+                <TH class="col-xs-1" nowrap><b>First Seen</b></TH>
+                <TH class="col-xs-1" nowrap><b>Last Seen</b></TH>
                 <TH class="col-xs-1" nowrap><b>Firewall</b></TH>
                 <TH class="col-xs-1" nowrap><b>Open Ports</b></TH>
                 <TH class="col-xs-1" nowrap><b>Monitored</b></TH>
@@ -31,14 +34,17 @@
         </thead>
         <tbody>
 {% for device in deviceList %}
+
         <tr class="row" style="border-bottom: 1px solid #ccc;">
             <td class="col-xs-1" nowrap>{{device['nickname']|safe}}&nbsp;&nbsp;<span data-toggle="modal" data-target="#renameDevice{{loop.index}}" style="cursor: pointer;"><span class="glyphicon glyphicon-edit" ></span></span></td>
             <td class="col-xs-1" nowrap>{{device['ip']|safe}}</td>
             <td class="col-xs-1" nowrap>{{device['mac']|safe}}</td>
             <td class="col-xs-1" nowrap>{{device['vendor']|safe}}</td>
+            <td class="col-xs-1 w3-{% if device['firstSeenToday'] %}red{% else %}white{% endif %}" nowrap>{{device['firstSeen']|safe}}</td>
+            <td class="col-xs-1 w3-{% if device['online'] %}white{% else %}red{% endif %}" nowrap>{{device['lastSeen']|safe}}</td>
             <td class="col-xs-1" nowrap>{{device['defaultFwAction']}}</td>
             <td class="col-xs-1" nowrap>{{device['openPorts']}}</td>
-            <td class="col-xs-1 w3-{% if device['ignore'] == '0' %}green{% else %}red{% endif %}" nowrap>{% if device['ignore'] == '0' %}Yes{% else %}No{% endif %}</td>
+            <td class="col-xs-1 w3-{% if device['ignore'] == '0' %}white{% else %}brown{% endif %}" nowrap>{% if device['ignore'] == '0' %}Yes{% else %}No{% endif %}</td>
             <td class="col-xs-1" nowrap><button  class="w3-btn-block w3-dark-grey" onclick="location.href='/device/{{device['mac']}}'" >More Info...</button></td>
         </tr>
 

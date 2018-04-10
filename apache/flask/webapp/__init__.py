@@ -14,6 +14,9 @@ import email
 import es
 import validators
 
+def split_ip(ip):
+    """Split a IP address given as string into a 4-tuple of integers."""
+    return tuple(int(part) for part in ip.split('.'))
 
 class ConfigClass(object):
 __appSettings__
@@ -50,6 +53,15 @@ def create_app():
         allDevices=es.search(esService, matchAll, 'sweet_security', 'devices')
         if allDevices is not None:
             for host in allDevices['hits']['hits']:
+                now = datetime.datetime.now()
+
+                firstSeen = datetime.datetime.fromtimestamp(float(host['_source']['firstSeen']) / 1000.0)
+                firstSeenToday = firstSeen.date() == now.date()
+
+                lastSeen = datetime.datetime.fromtimestamp(float(host['_source']['lastSeen']) / 1000.0)
+                online = lastSeen + datetime.timedelta(minutes = 5) > now
+
+
                 portCount=0
                 portCountQuery = {"query": {"match_phrase": {"mac": { "query": host['_source']['mac']}}}}
                 portInfo=es.search(esService, portCountQuery, 'sweet_security', 'ports')
@@ -62,10 +74,13 @@ def create_app():
                         'vendor': host['_source']['vendor'],
                         'ignore': str(host['_source']['ignore']),
                         'defaultFwAction': host['_source']['defaultFwAction'],
-                        'firstSeen': host['_source']['firstSeen'],
-                        'lastSeen': host['_source']['lastSeen'],
+                        'firstSeen': firstSeen.strftime('%Y-%m-%d %H:%M:%S'),
+                        'firstSeenToday' : firstSeenToday,
+                        'lastSeen':lastSeen.strftime('%Y-%m-%d %H:%M:%S'),
+                        'online':online,
                         'openPorts': portCount}
                 deviceList.append(deviceInfo)
+        deviceList.sort(key=lambda device: split_ip(device['ip'])[3], reverse=False)
         alertQuery = {"query": {"match_phrase": {"addressed": {"query": 0}}}}
         allAlerts = es.search(esService, alertQuery, 'sweet_security_alerts', 'alerts')
         if allAlerts['hits']['total'] > 0:
@@ -413,7 +428,7 @@ def create_app():
                 deviceInfo['portList']=sortedPortList
 
                 lastPortScanQuery = {"sort": [{"@timestamp": {"order": "desc"}}], "query": {"bool": { "must": [{"match": {"ipAddress": host['_source']['ip4']}}, {"match": {"action": "Port scanning"}}]}}}
-                lastPortScanInfo = es.search(esService, lastPortScanQuery, 'logstash-*', 'logs', 1)
+                lastPortScanInfo = es.search(esService, lastPortScanQuery, 'logstash-*', 'logs', None, 1)
                 if lastPortScanInfo is not None:
                     if len(lastPortScanInfo['hits']['hits']) > 0:
                         lastPortScan = datetime.datetime.strptime(lastPortScanInfo['hits']['hits'][0]['_source']['@timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
