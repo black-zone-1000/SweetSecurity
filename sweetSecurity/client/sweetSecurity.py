@@ -156,7 +156,7 @@ def startHealthCheck():
 		try:
 			#get info every 5 minutes
 			healthCheck.check()
-	except Exception, e:
+		except Exception, e:
                        	logger.info(str(e))
                        	pass
 	sleep(300)
