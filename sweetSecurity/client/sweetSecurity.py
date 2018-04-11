@@ -96,35 +96,70 @@ def startGetConfig():
 
 def startPingSweep():
 	while 1:
-		nmap.pingSweep()
+		try:
+			nmap.pingSweep()
+		except Exception, e:
+                        logger.info(str(e))
+                        pass
+
 		sleep(20)
 
 def startPortScan():
 	while 1:
 		#Port Scan Every Hour, sleeping first to let first ping sweep finish
 		sleep(60)
-		nmap.portScan()
+		try:
+			nmap.portScan()
+		except Exception, e:
+                        logger.info(str(e))
+                        pass
+
 		sleep(3540)
 
 def startLsTi():
 	while 1:
 		#Pull New Info Every Hour
 		logger.info('Downloading malicious IP list')
-		pullMaliciousIP.do()
+		try:
+			pullMaliciousIP.do()
+		except Exception, e:
+                        logger.info(str(e))
+                        pass
+
 		logger.info('Downloading TOR Exit node list')
-		pullTorIP.do()
+		try:
+			pullTorIP.do()
+		except Exception, e:
+                        logger.info(str(e))
+                        pass
+
 		#If Critical Stack is installed, pull feeds
-		if os.path.isfile('/usr/bin/critical-stack-intel'):
-			os.popen('sudo -u critical-stack critical-stack-intel pull').read()
+		try:
+			if os.path.isfile('/usr/bin/critical-stack-intel'):
+				os.popen('sudo -u critical-stack critical-stack-intel pull').read()
+		except Exception, e:
+                        logger.info(str(e))
+                        pass
+
 		sleep(3600)
 		#Backup DB
-		os.system("cp /opt/sweetsecurity/client/db/SweetSecurity.db /opt/sweetsecurity/client/SweetSecurity.db");
+
+		try:
+			os.system("cp /opt/sweetsecurity/client/db/SweetSecurity.db /opt/sweetsecurity/client/SweetSecurity.db");
+		except Exception, e:
+                	logger.info(str(e))
+                        pass
+
 
 def startHealthCheck():
 	while 1:
-		#get info every 5 minutes
-		healthCheck.check()
-		sleep(300)
+		try:
+			#get info every 5 minutes
+			healthCheck.check()
+	except Exception, e:
+                       	logger.info(str(e))
+                       	pass
+	sleep(300)
 
 def doStuff():
 	logger.info('Starting up SweetSecurity')
