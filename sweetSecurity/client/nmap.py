@@ -141,7 +141,7 @@ def pingSweep():
 				conn.close()
 	except:
 		logger.info("Invalid Ping Sweep XML File")
-	os.system('rm ' + file)
+	os.system('sudo rm ' + file)
 
 def portScan():
 	logger = logging.getLogger('SweetSecurityLogger')

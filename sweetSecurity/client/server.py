@@ -33,13 +33,13 @@ def addDevice(hostname,ip,mac,vendor,ignored):
 	session = requests.Session()
 	session.auth = (username, password)
 	if webCert == 'development':
-		auth = session.get(csrfUrl, verify=False)
+		auth = session.get(csrfUrl, verify=False, timeout=5000)
 		data['csrf_token']=auth.content
-		response=session.post(url,data=data, verify=False, headers={"referer": url})
+		response=session.post(url,data=data, verify=False, headers={"referer": url}, timeout=5000)
 	else:
 		auth = session.get(csrfUrl, verify=False)
 		data['csrf_token']=auth.content
-		response=session.post(url ,data=data, verify=False, headers={"referer": url })
+		response=session.post(url ,data=data, verify=False, headers={"referer": url }, timeout=5000)
 	return response
 
 def addPort(portInfo): 
@@ -53,13 +53,13 @@ def addPort(portInfo):
 	session = requests.Session()
 	session.auth = (username, password)
 	if webCert == 'development':
-		auth = session.get(csrfUrl, verify=False)
+		auth = session.get(csrfUrl, verify=False, timeout=5000)
 		portInfo['csrf_token']=auth.content
-		response=session.post(url,data=portInfo, verify=False, headers={"referer": url})
+		response=session.post(url,data=portInfo, verify=False, headers={"referer": url}, timeout=5000)
 	else:
-		auth = session.get(csrfUrl, verify=False)
+		auth = session.get(csrfUrl, verify=False, timeout=5000)
 		portInfo['csrf_token']=auth.content
-		response=session.post(url ,data=portInfo, verify=False, headers={"referer": url })
+		response=session.post(url ,data=portInfo, verify=False, headers={"referer": url }, timeout=5000)
 	return response
 
 def getConfig(): 
@@ -91,11 +91,11 @@ def healthCheck(healthInfo):
 	session = requests.Session()
 	session.auth = (username, password)
 	if webCert == 'development':
-		auth = session.get(csrfUrl, verify=False)
+		auth = session.get(csrfUrl, verify=False, timeout=5000)
 		healthInfo['csrf_token']=auth.content
-		response=session.post(url,data=healthInfo, verify=False, headers={"referer": url})
+		response=session.post(url,data=healthInfo, verify=False, headers={"referer": url}, timeout=5000)
 	else:
-		auth = session.get(csrfUrl, verify=False)
+		auth = session.get(csrfUrl, verify=False, timeout=5000)
 		healthInfo['csrf_token']=auth.content
-		response=session.post(url ,data=healthInfo, verify=False, headers={"referer": url })
+		response=session.post(url ,data=healthInfo, verify=False, headers={"referer": url }, timeout=5000)
 	return response
